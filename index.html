@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QuantumVision — ML × Quantum Dynamics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080b13;
+    --bg-2:#0c1220;
+    --panel:rgba(255,255,255,0.038);
+    --panel-2:rgba(255,255,255,0.055);
+    --panel-border:rgba(148,168,207,0.16);
+    --text:#e9edf6;
+    --text-muted:#8791ab;
+    --text-dim:#5c6480;
+    --exact:#5fd8ca;
+    --exact-dim:rgba(95,216,202,0.28);
+    --ml:#f2a65a;
+    --ml-dim:rgba(242,166,90,0.28);
+    --warn:#ff7a7a;
+    --good:#7be0a8;
+    --grid:rgba(148,168,207,0.09);
+    --radius-lg:18px;
+    --radius-md:12px;
+    --radius-sm:8px;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *,*::before,*::after{box-sizing:inherit;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px); scroll-behavior:auto;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 620px at 82% -8%, rgba(95,216,202,0.10), transparent 60%),
+      radial-gradient(900px 560px at -10% 12%, rgba(242,166,90,0.07), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Fraunces', Georgia, serif; margin:0; letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono', ui-monospace, monospace;}
+  a{color:inherit;}
+  ::selection{background:rgba(95,216,202,0.28);}
+
+  .wrap{max-width:1360px; margin:0 auto; padding:0 clamp(16px,4vw,44px);}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative; overflow:hidden; padding:56px 0 40px; border-bottom:1px solid var(--panel-border);}
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 14px; border-radius:99px;
+    background:var(--panel); border:1px solid var(--panel-border);
+    font-size:12.5px; color:var(--text-muted); font-family:'IBM Plex Mono',monospace;
+    margin-bottom:22px;
+  }
+  .hero-badge::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--exact); box-shadow:0 0 8px var(--exact);}
+  .hero-grid{display:grid; grid-template-columns:1.15fr 0.85fr; gap:40px; align-items:center;}
+
+  .quantum-intro{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(4,8,17,0.7); backdrop-filter:blur(8px); z-index:30;
+    padding:20px; opacity:1; visibility:visible; transition:opacity .25s ease, visibility .25s ease;
+  }
+  .quantum-intro.hidden{opacity:0; visibility:hidden; pointer-events:none;}
+  .quantum-card{
+    width:min(520px, 92vw); background:linear-gradient(135deg, rgba(10,15,25,0.95), rgba(16,22,34,0.95));
+    border:1px solid rgba(95,216,202,0.45); border-radius:28px; padding:28px 24px;
+    box-shadow:0 28px 80px rgba(7,13,18,0.75); text-align:center; position:relative; overflow:hidden;
+  }
+  .quantum-card::before, .quantum-card::after{
+    content:''; position:absolute; width:180px; height:180px; border-radius:50%; border:1px solid rgba(95,216,202,0.24); top:-50px; right:-40px; animation:spinSlow 20s linear infinite;
+  }
+  .quantum-card::after{left:-50px; bottom:-40px; border-color:rgba(242,166,90,0.24); animation-duration:28s;}
+  .quantum-cartoon{position:relative; width:120px; height:120px; margin:0 auto 20px; border-radius:50%; background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(95,216,202,0.45) 18%, rgba(94,122,255,0.25) 40%, rgba(8,10,17,0.7) 100%); border:2px solid rgba(95,216,202,0.7); box-shadow:0 0 30px rgba(95,216,202,0.35); animation:floatQuantum 3.2s ease-in-out infinite;}
+  .quantum-cartoon::before, .quantum-cartoon::after{
+    content:''; position:absolute; border-radius:50%; border:2px solid rgba(242,166,90,0.8);
+  }
+  .quantum-cartoon::before{width:68px; height:68px; left:8px; top:18px;}
+  .quantum-cartoon::after{width:88px; height:88px; right:10px; bottom:8px; border-color:rgba(95,216,202,0.9);}
+  .quantum-face{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:2.1rem;}
+  @keyframes floatQuantum {0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)}}
+  @keyframes spinSlow {from{transform:rotate(0deg)} to{transform:rotate(360deg)}}
+  .quantum-card h2{font-size:2.1rem; color:var(--text); margin:0 0 8px;}
+  .quantum-card p{margin:0 0 18px; color:var(--text-muted);}
+  .name-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .name-row input{
+    flex:1 1 180px; max-width:260px; background:rgba(255,255,255,0.04); border:1px solid var(--panel-border); color:var(--text);
+    border-radius:999px; padding:12px 16px; font-size:1rem;
+  }
+  .name-row button{padding:12px 18px; border:none; border-radius:999px; background:linear-gradient(135deg, var(--exact), #a5ffd4); color:#051914; font-weight:700; cursor:pointer;}
+  .welcome-chip{display:inline-flex; align-items:center; gap:8px; margin-bottom:22px;}
+  .game-grid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; margin-top:18px;}
+  .mini-game{background:linear-gradient(180deg, rgba(255,255,255,0.025), rgba(95,216,202,0.04)); border:1px solid var(--panel-border); border-radius:var(--radius-lg); padding:18px; display:flex; flex-direction:column; gap:14px; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02); animation:floatGame 5s ease-in-out infinite alternate;}
+  .mini-game:nth-child(2){animation-delay:.8s;} .mini-game:nth-child(3){animation-delay:1.6s;}
+  .mini-game h3{font-size:1.05rem; margin:0; font-family:'IBM Plex Sans',sans-serif;}
+  .mini-game small{color:var(--text-muted); display:block; margin-top:4px;}
+  .game-score{font-family:'IBM Plex Mono', monospace; color:var(--exact); font-size:1.1rem;}
+  @keyframes floatGame {from{transform:translateY(0)} to{transform:translateY(-4px)}}
+  .match-grid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px;}
+  .match-card{background:var(--bg-2); border:1px solid var(--panel-border); border-radius:12px; min-height:52px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); font-weight:700; transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease; user-select:none;}
+  .match-card:hover{transform:translateY(-2px); box-shadow:0 8px 18px rgba(95,216,202,0.12);}
+  .match-card.matched{background:rgba(95,216,202,0.12); border-color:rgba(95,216,202,0.45); color:var(--exact); box-shadow:0 0 18px rgba(95,216,202,0.18);}
+  .match-card.revealed{background:rgba(242,166,90,0.12); border-color:rgba(242,166,90,0.5);}
+  .photon-grid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px;}
+  .photon-btn{background:linear-gradient(135deg, rgba(148,168,207,0.12), rgba(95,216,202,0.1)); border:1px solid var(--panel-border); width:100%; min-height:50px; border-radius:10px; cursor:pointer; color:var(--text); font-size:1.3rem;}
+  .photon-btn.active{background:linear-gradient(135deg, rgba(242,166,90,0.9), rgba(255,122,122,0.75)); box-shadow:0 0 18px rgba(242,166,90,0.6); border-color:rgba(242,166,90,0.8);}
+  .wave-box{display:flex; flex-direction:column; gap:10px;}
+  .wave-track{position:relative; height:90px; border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(95,216,202,0.06)); border:1px solid var(--panel-border); overflow:hidden;}
+  .wave-bar{position:absolute; left:0; bottom:0; width:100%; height:100%; transform-origin:left bottom;}
+  .wave-bar::before{content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(95,216,202,0.12), rgba(95,216,202,0.02)); clip-path:polygon(0 100%, 0 42%, 12% 55%, 23% 32%, 36% 50%, 49% 30%, 66% 62%, 82% 28%, 100% 40%, 100% 100%);}
+  .wave-bar::after{content:''; position:absolute; left:0; width:100%; height:4px; background:linear-gradient(90deg, var(--exact), var(--ml)); bottom:42%; box-shadow:0 0 18px rgba(95,216,202,0.5);}
+  .wave-box input[type=range]{accent-color:var(--exact);}
+  .wave-box button{padding:10px 12px; border:none; border-radius:10px; background:linear-gradient(135deg, var(--ml), #f5cc7b); color:#1c1205; font-weight:700; cursor:pointer;}
+  @media (max-width: 920px){ .game-grid{grid-template-columns:1fr;} }
+  .hero h1{font-size:clamp(2.6rem,5.2vw,4.4rem); font-weight:500; line-height:1.02; color:var(--text);}
+  .hero h1 em{font-style:italic; font-weight:500; color:var(--exact); background:linear-gradient(90deg,var(--exact),var(--ml)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .hero-sub{margin-top:20px; font-size:1.08rem; color:var(--text-muted); max-width:52ch;}
+  .hero-lede{margin-top:14px; font-size:0.98rem; color:var(--text-dim); max-width:56ch;}
+  .hero-cta{display:flex; gap:14px; margin-top:30px; flex-wrap:wrap;}
+  .btn{
+    font-family:'IBM Plex Sans',sans-serif; font-weight:600; font-size:0.92rem;
+    padding:12px 22px; border-radius:10px; border:1px solid transparent; cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:linear-gradient(135deg,var(--exact),#3fb9ac); color:#04140f; box-shadow:0 8px 24px -8px rgba(95,216,202,0.55);}
+  .btn-primary:hover{box-shadow:0 10px 30px -6px rgba(95,216,202,0.7);}
+  .btn-ghost{background:transparent; border-color:var(--panel-border); color:var(--text);}
+  .btn-ghost:hover{border-color:rgba(148,168,207,0.4); background:var(--panel);}
+  .btn-ml{background:linear-gradient(135deg,var(--ml),#c97f38); color:#1b0f02;}
+  .btn:disabled{opacity:0.4; cursor:not-allowed; box-shadow:none; transform:none;}
+
+  .hero-wave{position:relative; height:260px; border-radius:var(--radius-lg); background:var(--panel); border:1px solid var(--panel-border); overflow:hidden;}
+  #heroCanvas{width:100%; height:100%; display:block;}
+
+  /* ---------- LAYOUT ---------- */
+  .section{padding:38px 0;}
+  .section-head{margin-bottom:20px;}
+  .section-head h2{font-size:1.5rem; font-weight:500;}
+  .section-head p{color:var(--text-muted); font-size:0.92rem; margin-top:6px; max-width:60ch;}
+
+  .app-grid{display:grid; grid-template-columns:296px 1fr; gap:22px; align-items:start;}
+  @media (max-width:920px){ .app-grid{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:var(--radius-lg);
+    padding:20px;
+  }
+  .panel + .panel{margin-top:18px;}
+  .panel-title{font-size:0.78rem; text-transform:none; letter-spacing:0.02em; color:var(--text-muted); font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:8px;}
+  .panel-title .dot{width:6px;height:6px;border-radius:50%; background:var(--exact);}
+
+  .field{margin-bottom:16px;}
+  .field label{display:flex; justify-content:space-between; font-size:0.84rem; color:var(--text-muted); margin-bottom:7px;}
+  .field label span.val{color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:0.8rem;}
+  select, input[type=range], input[type=number]{
+    width:100%; background:var(--bg-2); border:1px solid var(--panel-border); color:var(--text);
+    border-radius:var(--radius-sm); padding:9px 10px; font-family:'IBM Plex Sans',sans-serif; font-size:0.9rem;
+  }
+  select{appearance:none; cursor:pointer;}
+  input[type=range]{padding:0; height:6px; accent-color:var(--exact); cursor:pointer;}
+  .hint{font-size:0.74rem; color:var(--text-dim); margin-top:5px;}
+
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0;}
+  .toggle-row span{font-size:0.86rem; color:var(--text-muted);}
+  .switch{position:relative; width:42px; height:24px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider-tog{position:absolute; inset:0; background:var(--bg-2); border:1px solid var(--panel-border); border-radius:99px; cursor:pointer; transition:.2s;}
+  .slider-tog::before{content:''; position:absolute; width:16px; height:16px; left:3px; top:3px; background:var(--text-dim); border-radius:50%; transition:.2s;}
+  .switch input:checked + .slider-tog{background:rgba(95,216,202,0.25); border-color:var(--exact);}
+  .switch input:checked + .slider-tog::before{transform:translateX(18px); background:var(--exact);}
+
+  .btn-row{display:flex; gap:10px; margin-top:6px;}
+  .btn-row .btn{flex:1;}
+  .transport{display:flex; gap:8px; margin-top:14px;}
+  .transport button{
+    flex:1; background:var(--bg-2); border:1px solid var(--panel-border); color:var(--text);
+    border-radius:var(--radius-sm); padding:10px; cursor:pointer; font-size:1rem;
+  }
+  .transport button:hover{border-color:var(--exact);}
+  .transport button:disabled{opacity:.35; cursor:not-allowed;}
+
+  .status-msg{font-size:0.82rem; padding:10px 12px; border-radius:var(--radius-sm); margin-top:12px; display:none; border:1px solid; line-height:1.45;}
+  .status-msg.show{display:block;}
+  .status-msg.info{background:rgba(95,216,202,0.08); border-color:rgba(95,216,202,0.3); color:var(--exact);}
+  .status-msg.error{background:rgba(255,122,122,0.08); border-color:rgba(255,122,122,0.35); color:var(--warn);}
+  .status-msg.busy{background:rgba(242,166,90,0.08); border-color:rgba(242,166,90,0.32); color:var(--ml);}
+
+  /* plots */
+  .plot-card{background:var(--panel); border:1px solid var(--panel-border); border-radius:var(--radius-lg); padding:16px 18px 10px; margin-bottom:16px;}
+  .plot-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:8px;}
+  .plot-head h3{font-size:0.98rem; font-weight:500; font-family:'IBM Plex Sans',sans-serif; color:var(--text);}
+  .legend{display:flex; gap:14px; font-size:0.76rem; color:var(--text-muted); font-family:'IBM Plex Mono',monospace;}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend i{width:16px; height:2px; display:inline-block; border-radius:2px;}
+  canvas.plot{width:100%; display:block; border-radius:var(--radius-sm);}
+
+  .mode-tabs{display:flex; gap:6px; background:var(--bg-2); padding:4px; border-radius:99px; border:1px solid var(--panel-border); width:fit-content; margin-bottom:16px;}
+  .mode-tabs button{
+    border:none; background:transparent; color:var(--text-muted); font-size:0.82rem; font-weight:600;
+    padding:7px 15px; border-radius:99px; cursor:pointer; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .mode-tabs button.active{background:var(--panel-2); color:var(--text);}
+
+  .time-row{display:flex; align-items:center; gap:12px; margin-top:2px;}
+  .time-row input[type=range]{flex:1;}
+  .time-readout{font-family:'IBM Plex Mono',monospace; font-size:0.82rem; color:var(--text-muted); min-width:96px; text-align:right;}
+
+  /* metrics */
+  .metrics-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px;}
+  .metric{background:var(--bg-2); border:1px solid var(--panel-border); border-radius:var(--radius-md); padding:14px 16px;}
+  .metric .m-label{font-size:0.72rem; color:var(--text-dim); text-transform:none;}
+  .metric .m-value{font-family:'IBM Plex Mono',monospace; font-size:1.28rem; margin-top:5px; color:var(--text);}
+  .metric .m-value.exact{color:var(--exact);}
+  .metric .m-value.ml{color:var(--ml);}
+  .metric .m-sub{font-size:0.72rem; color:var(--text-dim); margin-top:3px;}
+
+  details.edu{background:var(--panel); border:1px solid var(--panel-border); border-radius:var(--radius-lg); padding:4px 20px;}
+  details.edu summary{cursor:pointer; padding:16px 0; font-family:'Fraunces',serif; font-size:1.15rem; font-weight:500; list-style:none; display:flex; justify-content:space-between; align-items:center;}
+  details.edu summary::-webkit-details-marker{display:none;}
+  details.edu summary::after{content:'+'; font-size:1.4rem; color:var(--text-muted); font-family:'IBM Plex Sans';}
+  details.edu[open] summary::after{content:'–';}
+  .edu-body{padding:0 0 22px; color:var(--text-muted); font-size:0.94rem; max-width:74ch;}
+  .edu-body p{margin:0 0 12px;}
+  .edu-body .eq{font-family:'IBM Plex Mono',monospace; background:var(--bg-2); padding:10px 14px; border-radius:var(--radius-sm); display:inline-block; margin:6px 0; color:var(--exact); border:1px solid var(--panel-border);}
+  .disclaimer{margin-top:14px; padding:12px 14px; background:rgba(242,166,90,0.06); border:1px solid rgba(242,166,90,0.25); border-radius:var(--radius-sm); font-size:0.85rem; color:var(--ml);}
+
+  .flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-family:'IBM Plex Mono',monospace; font-size:0.76rem; color:var(--text-muted); margin-top:18px;}
+  .flow span{background:var(--bg-2); border:1px solid var(--panel-border); padding:6px 11px; border-radius:99px;}
+  .flow i{color:var(--text-dim);}
+
+  .research-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:18px;}
+  @media (max-width:820px){ .research-grid{grid-template-columns:1fr;} }
+  .valid-row{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--panel-border);}
+  .valid-row:last-child{border-bottom:none;}
+  .valid-row .vl{font-size:0.86rem; color:var(--text-muted);}
+  .valid-row .veq{font-family:'IBM Plex Mono',monospace; font-size:0.82rem; color:var(--text-dim);}
+  .valid-row .vv{font-family:'IBM Plex Mono',monospace; font-size:0.98rem; color:var(--text);}
+
+  footer{padding:30px 0 50px; text-align:center; color:var(--text-dim); font-size:0.8rem;}
+
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="hero-badge welcome-chip" id="welcomeBadge">HOLAAA, FRIEND!</div>
+      <h1>Quantum<em>Vision</em></h1>
+      <p class="hero-sub"><strong style="color:var(--text); font-weight:600;">Machine Learning × Quantum Dynamics.</strong> Learn, simulate, and visualize quantum wave-function evolution.</p>
+      <p class="hero-lede">QuantumVision solves the 1D time-dependent Schrödinger equation numerically, then trains a small neural network to approximate that same evolution one step at a time — so you can watch exact physics and a learned model diverge, frame by frame.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary" id="ctaLaunch">Launch Simulation</button>
+        <button class="btn btn-ghost" id="ctaExplore">Explore the Physics</button>
+      </div>
+    </div>
+    <div class="hero-wave"><canvas id="heroCanvas"></canvas></div>
+  </div>
+</header>
+
+<section class="quantum-intro" id="quantumIntro">
+  <div class="quantum-card">
+    <div class="quantum-cartoon"><div class="quantum-face">⚛️</div></div>
+    <h2>HOLAAA!</h2>
+    <p>Enter your name and begin your quantum adventure.</p>
+    <div class="name-row">
+      <input id="playerNameInput" maxlength="18" placeholder="ENTER UR NAME" aria-label="Enter your name" />
+      <button id="startQuantumBtn" type="button">Launch</button>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <section class="section" id="miniGames">
+    <div class="section-head">
+      <h2>Quantum Mini Games</h2>
+      <p>Three tiny playful challenges for your inner quantum explorer.</p>
+    </div>
+    <div class="game-grid">
+      <div class="mini-game">
+        <div>
+          <h3>Qubit Match</h3>
+          <small>Pair the same quantum states.</small>
+        </div>
+        <div class="game-score" id="matchScore">Score: 0</div>
+        <div class="match-grid" id="matchGrid"></div>
+      </div>
+
+      <div class="mini-game">
+        <div>
+          <h3>Photon Catcher</h3>
+          <small>Tap the glowing photon before it fades.</small>
+        </div>
+        <div class="game-score" id="photonScore">Score: 0</div>
+        <div class="photon-grid" id="photonGrid"></div>
+      </div>
+
+      <div class="mini-game">
+        <div>
+          <h3>Wave Tune</h3>
+          <small>Set the wave amplitude to the target.</small>
+        </div>
+        <div class="game-score" id="waveScore">Streak: 0</div>
+        <div class="wave-box">
+          <div class="wave-track"><div class="wave-bar" id="waveBar"></div></div>
+          <input id="waveSlider" type="range" min="0" max="100" value="50" />
+          <button id="waveSubmit" type="button">Tune Wave</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section class="section" id="app">
+    <div class="app-grid">
+
+      <!-- SIDEBAR -->
+      <div id="sidebar">
+        <div class="panel">
+          <div class="panel-title"><span class="dot"></span>System Controls</div>
+
+          <div class="field">
+            <label>Potential type</label>
+            <select id="potentialSel">
+              <option value="free">Free particle</option>
+              <option value="harmonic" selected>Harmonic oscillator</option>
+              <option value="barrier">Potential barrier</option>
+              <option value="well">Finite square well</option>
+              <option value="doublewell">Double well</option>
+            </select>
+            <div class="hint" id="potentialHint"></div>
+          </div>
+
+          <div class="field">
+            <label>Particle mass (m) <span class="val" id="massVal">1.00</span></label>
+            <input type="range" id="massSlider" min="0.3" max="3" step="0.05" value="1">
+          </div>
+
+          <div class="field">
+            <label>Wave-packet position x₀ <span class="val" id="x0Val">-2.00</span></label>
+            <input type="range" id="x0Slider" min="-8" max="8" step="0.1" value="-2">
+          </div>
+
+          <div class="field">
+            <label>Wave-packet width σ <span class="val" id="sigmaVal">0.50</span></label>
+            <input type="range" id="sigmaSlider" min="0.2" max="2" step="0.05" value="0.5">
+          </div>
+
+          <div class="field">
+            <label>Initial momentum k₀ <span class="val" id="k0Val">2.00</span></label>
+            <input type="range" id="k0Slider" min="-6" max="6" step="0.1" value="2">
+            <div class="hint">Kinetic energy ⟨E⟩ ≈ <span class="mono" id="ekVal">2.00</span> (ℏ=1)</div>
+          </div>
+
+          <div class="field">
+            <label>Simulation duration (t) <span class="val" id="timeVal">10.0</span></label>
+            <input type="range" id="timeSlider" min="2" max="20" step="0.5" value="10">
+          </div>
+
+          <div class="toggle-row">
+            <span>Normalize ML output each step</span>
+            <label class="switch"><input type="checkbox" id="normalizeToggle" checked><span class="slider-tog"></span></label>
+          </div>
+
+          <button class="btn btn-primary" id="genTrainBtn" style="width:100%; margin-top:8px;">Generate &amp; Train</button>
+
+          <div class="transport">
+            <button id="playBtn" disabled title="Play">▶</button>
+            <button id="pauseBtn" disabled title="Pause">⏸</button>
+            <button id="resetBtn" disabled title="Reset">↻</button>
+          </div>
+          <div class="time-row" style="margin-top:12px;">
+            <input type="range" id="timeline" min="0" max="199" step="1" value="0" disabled>
+          </div>
+          <div class="time-readout mono" id="timeReadout" style="text-align:left; margin-top:4px;">t = 0.00 / 0.00</div>
+
+          <div class="status-msg" id="statusMsg"></div>
+        </div>
+      </div>
+
+      <!-- MAIN VISUALIZATION -->
+      <div id="mainviz">
+
+        <div class="mode-tabs" id="modeTabs">
+          <button data-mode="both" class="active">Comparison</button>
+          <button data-mode="exact">Exact Physics</button>
+          <button data-mode="ml">ML Prediction</button>
+        </div>
+
+        <div class="plot-card">
+          <div class="plot-head"><h3>Potential V(x)</h3></div>
+          <canvas class="plot" id="potCanvas" height="120"></canvas>
+        </div>
+
+        <div class="plot-card">
+          <div class="plot-head">
+            <h3>Wave Function ψ(x,t)</h3>
+            <div class="legend">
+              <span><i style="background:var(--exact);"></i>Exact · Re</span>
+              <span><i style="background:var(--exact); border-top:2px dashed var(--exact); background:transparent;"></i>Exact · Im</span>
+              <span><i style="background:var(--ml);"></i>ML · Re</span>
+              <span><i style="background:transparent; border-top:2px dashed var(--ml);"></i>ML · Im</span>
+            </div>
+          </div>
+          <canvas class="plot" id="psiCanvas" height="200"></canvas>
+        </div>
+
+        <div class="plot-card">
+          <div class="plot-head">
+            <h3>Probability Density |ψ(x,t)|²</h3>
+            <div class="legend">
+              <span><i style="background:var(--exact);"></i>Exact Physics</span>
+              <span><i style="background:transparent; border-top:2px dashed var(--ml);"></i>ML Prediction</span>
+            </div>
+          </div>
+          <canvas class="plot" id="probCanvas" height="180"></canvas>
+        </div>
+
+        <!-- METRICS -->
+        <div class="panel">
+          <div class="panel-title"><span class="dot"></span>Live Metrics</div>
+          <div class="metrics-grid">
+            <div class="metric"><div class="m-label">Time</div><div class="m-value" id="metricT">t = 0.00</div></div>
+            <div class="metric"><div class="m-label">Normalization · Exact</div><div class="m-value exact" id="metricNExact">N = 1.0000</div></div>
+            <div class="metric"><div class="m-label">Normalization · ML</div><div class="m-value ml" id="metricNMl">N = —</div></div>
+            <div class="metric"><div class="m-label">|N−1| · Exact</div><div class="m-value exact" id="metricErrExact">0.0000</div></div>
+            <div class="metric"><div class="m-label">|N−1| · ML (used)</div><div class="m-value ml" id="metricErrMl">—</div></div>
+            <div class="metric"><div class="m-label">Wave-function RMSE</div><div class="m-value" id="metricRmse">—</div></div>
+            <div class="metric"><div class="m-label">ML training loss</div><div class="m-value" id="metricLoss">—</div><div class="m-sub" id="metricLossSub">not trained yet</div></div>
+            <div class="metric"><div class="m-label">Raw / Normalized ML norm. error</div><div class="m-value" id="metricRawNorm" style="font-size:1.0rem;">— / —</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="flow">
+      <span>USER PARAMETERS</span><i>→</i><span>QUANTUM SYSTEM</span><i>→</i><span>SCHRÖDINGER SOLVER</span><i>→</i><span>PHYSICS TRAJECTORY</span><i>→</i><span>ML TRAINING</span><i>→</i><span>AUTOREGRESSIVE ML PREDICTION</span><i>→</i><span>EXACT vs ML</span><i>→</i><span>PHYSICS VALIDATION</span>
+    </div>
+  </section>
+
+  <!-- EDUCATIONAL PANEL -->
+  <section class="section" id="edu">
+    <details class="edu">
+      <summary>What is happening?</summary>
+      <div class="edu-body">
+        <p>The wave function ψ(x,t) describes the quantum state of the particle. It is a complex-valued function of position and time, so at every point we track both a real and an imaginary component.</p>
+        <p>Its probability density is <span class="eq">|ψ(x,t)|²</span> — this tells us how likely the particle is to be found near position x at time t. Integrated over all space it must always equal 1, since the particle exists somewhere.</p>
+        <p>The Schrödinger equation determines exactly how the wave function evolves in time, given the system's potential energy V(x). QuantumVision solves this equation numerically using a split-step Fourier method, which alternates between position space (where the potential acts) and momentum space (where kinetic energy acts).</p>
+        <p>The ML model attempts to learn this evolution directly from previously generated physical trajectories — given ψ at one instant, it predicts ψ a short time later. Run autoregressively, its own predictions become its next inputs, so small errors can compound over time. This application compares the ML approximation with the numerical physics solution, frame by frame, so those errors are visible rather than hidden.</p>
+        <div class="disclaimer">The model learns a numerical approximation to the wave-function dynamics for this specific simulated system — it has not learned quantum mechanics in general, and this is not a quantum computer, a universal quantum simulator, or an exact quantum predictor.</div>
+      </div>
+    </details>
+  </section>
+
+  <!-- RESEARCH PANEL -->
+  <section class="section" id="research">
+    <div class="section-head">
+      <h2>Physics Validation</h2>
+      <p>Quantitative checks comparing the trained network's rollout against the numerical solution it was trained on.</p>
+    </div>
+    <div class="research-grid">
+      <div class="panel">
+        <div class="valid-row">
+          <div class="vl">Probability conservation</div>
+          <div><span class="veq">∫|ψ|²dx = 1</span></div>
+          <div class="vv" id="rvConservation">—</div>
+        </div>
+        <div class="valid-row">
+          <div class="vl">Prediction error</div>
+          <div><span class="veq">RMSE(ψ_exact, ψ_ML)</span></div>
+          <div class="vv" id="rvRmse">—</div>
+        </div>
+        <div class="valid-row">
+          <div class="vl">Long-term stability</div>
+          <div><span class="veq">mean |N(t)−1| over run</span></div>
+          <div class="vv" id="rvStability">—</div>
+        </div>
+        <div class="valid-row">
+          <div class="vl">Validation loss (held-out pairs)</div>
+          <div><span class="veq">MSE, 20% split</span></div>
+          <div class="vv" id="rvValLoss">—</div>
+        </div>
+      </div>
+      <div class="plot-card" style="margin-bottom:0;">
+        <div class="plot-head"><h3>Normalization error over time</h3>
+          <div class="legend"><span><i style="background:var(--exact);"></i>Exact</span><span><i style="background:var(--ml);"></i>ML (raw rollout)</span></div>
+        </div>
+        <canvas class="plot" id="stabCanvas" height="160"></canvas>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>QuantumVision — a numerical-physics + machine-learning demonstration. All values shown are computed live in your browser.</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================= CONSTANTS ======================= */
+const N = 256;            // spatial grid points (power of 2 for FFT)
+const HBAR = 1.0;
+const N_FRAMES = 200;      // stored rollout frames
+const SUBSTEPS = 8;        // solver substeps per stored frame
+
+const PRESETS = {
+  free:       { L:15, x0:-6, sigma:0.7, k0:3,   simTime:6,  hint:'V(x) = 0 — a free wave packet spreads and drifts at constant group velocity.' },
+  harmonic:   { L:10, x0:-2, sigma:0.5, k0:2,   simTime:10, hint:'V(x) = ½x² — the packet oscillates back and forth like a classical pendulum.' },
+  barrier:    { L:12, x0:-6, sigma:0.8, k0:2.5, simTime:8,  hint:'A rectangular barrier (V₀=6, width=1.4) — watch reflection and tunneling.' },
+  well:       { L:10, x0:0,  sigma:1.0, k0:0,   simTime:10, hint:'A finite square well (depth=6, width=3) — a bound-state-like wave packet.' },
+  doublewell: { L:9,  x0:-3, sigma:0.6, k0:0,   simTime:14, hint:'A symmetric quartic double well — watch the packet tunnel between minima.' }
+};
+
+/* ======================= FFT (iterative, radix-2) ======================= */
+function fft(re, im, invert){
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      let t = re[i]; re[i] = re[j]; re[j] = t;
+      t = im[i]; im[i] = im[j]; im[j] = t;
+    }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = (invert ? 2 : -2) * Math.PI / len;
+    const wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let curWr = 1, curWi = 0;
+      const half = len >> 1;
+      for (let j = 0; j < half; j++) {
+        const ur = re[i + j], ui = im[i + j];
+        const t1r = re[i + j + half], t1i = im[i + j + half];
+        const vr = t1r * curWr - t1i * curWi;
+        const vi = t1r * curWi + t1i * curWr;
+        re[i + j] = ur + vr; im[i + j] = ui + vi;
+        re[i + j + half] = ur - vr; im[i + j + half] = ui - vi;
+        const nwr = curWr * wr - curWi * wi;
+        const nwi = curWr * wi + curWi * wr;
+        curWr = nwr; curWi = nwi;
+      }
+    }
+  }
+  if (invert) {
+    for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+  }
+}
+
+/* ======================= PHYSICS ======================= */
+function buildGrid(L){
+  const dx = (2 * L) / N;
+  const x = new Float64Array(N);
+  for (let i = 0; i < N; i++) x[i] = -L + i * dx;
+  const k = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    const idx = i < N / 2 ? i : i - N;
+    k[i] = (2 * Math.PI * idx) / (N * dx);
+  }
+  return { dx, x, k };
+}
+
+function potentialAt(type, x){
+  const V = new Float64Array(N);
+  if (type === 'free') {
+    // all zero
+  } else if (type === 'harmonic') {
+    for (let i = 0; i < N; i++) V[i] = 0.5 * x[i] * x[i];
+  } else if (type === 'barrier') {
+    const V0 = 6, w = 1.4;
+    for (let i = 0; i < N; i++) V[i] = Math.abs(x[i]) < w / 2 ? V0 : 0;
+  } else if (type === 'well') {
+    const V0 = 6, w = 3;
+    for (let i = 0; i < N; i++) V[i] = Math.abs(x[i]) < w / 2 ? -V0 : 0;
+  } else if (type === 'doublewell') {
+    const a = 3, Vd = 4;
+    for (let i = 0; i < N; i++) { const r = (x[i] * x[i]) / (a * a) - 1; V[i] = Vd * r * r; }
+  }
+  return V;
+}
+
+function gaussianPacket(x, x0, sigma, k0, dx){
+  const re = new Float64Array(N), im = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    const env = Math.exp(-((x[i] - x0) ** 2) / (4 * sigma * sigma));
+    re[i] = env * Math.cos(k0 * x[i]);
+    im[i] = env * Math.sin(k0 * x[i]);
+  }
+  normalizeArr(re, im, dx);
+  return { re, im };
+}
+
+function normOf(re, im, dx){
+  let s = 0;
+  for (let i = 0; i < N; i++) s += re[i] * re[i] + im[i] * im[i];
+  return s * dx;
+}
+function normalizeArr(re, im, dx){
+  const n = Math.sqrt(normOf(re, im, dx)) || 1;
+  for (let i = 0; i < N; i++) { re[i] /= n; im[i] /= n; }
+}
+
+// One symmetric split-step (potential-half, kinetic-full, potential-half)
+function splitStep(re, im, V, k, dt, mass){
+  for (let i = 0; i < N; i++) {
+    const phi = (V[i] * dt) / (2 * HBAR);
+    const c = Math.cos(phi), s = Math.sin(phi);
+    const a = re[i], b = im[i];
+    re[i] = a * c + b * s;
+    im[i] = b * c - a * s;
+  }
+  fft(re, im, false);
+  for (let i = 0; i < N; i++) {
+    const phi = (HBAR * k[i] * k[i] * dt) / (2 * mass);
+    const c = Math.cos(phi), s = Math.sin(phi);
+    const a = re[i], b = im[i];
+    re[i] = a * c + b * s;
+    im[i] = b * c - a * s;
+  }
+  fft(re, im, true);
+  for (let i = 0; i < N; i++) {
+    const phi = (V[i] * dt) / (2 * HBAR);
+    const c = Math.cos(phi), s = Math.sin(phi);
+    const a = re[i], b = im[i];
+    re[i] = a * c + b * s;
+    im[i] = b * c - a * s;
+  }
+}
+
+function hasNaN(arr){
+  for (let i = 0; i < arr.length; i++) if (!isFinite(arr[i])) return true;
+  return false;
+}
+
+/* Generate the full exact trajectory: N_FRAMES states of length N (re,im) */
+function generateExactTrajectory(params){
+  const { dx, x, k } = buildGrid(params.L);
+  const V = potentialAt(params.potential, x);
+  let { re, im } = gaussianPacket(x, params.x0, params.sigma, params.k0, dx);
+  const dtFrame = params.simTime / (N_FRAMES - 1);
+  const dtSolver = dtFrame / SUBSTEPS;
+
+  const frames = []; // {re: Float64Array, im: Float64Array}
+  frames.push({ re: re.slice(), im: im.slice() });
+  for (let f = 1; f < N_FRAMES; f++) {
+    for (let s = 0; s < SUBSTEPS; s++) splitStep(re, im, V, k, dtSolver, params.mass);
+    if (hasNaN(re) || hasNaN(im)) throw new Error('Simulation became unstable (NaN detected). Try a shorter duration or different parameters.');
+    frames.push({ re: re.slice(), im: im.slice() });
+  }
+  return { frames, V, x, dx, k, dtFrame };
+}
+
+/* ======================= SMALL MLP (vanilla JS, Adam) ======================= */
+function xavier(nIn, nOut){
+  const lim = Math.sqrt(6 / (nIn + nOut));
+  return (Math.random() * 2 - 1) * lim;
+}
+class MLP{
+  constructor(sizes){ // e.g. [512, 64, 64, 512]
+    this.sizes = sizes;
+    this.W = []; this.b = [];
+    this.mW = []; this.vW = []; this.mB = []; this.vB = [];
+    for (let l = 0; l < sizes.length - 1; l++) {
+      const nIn = sizes[l], nOut = sizes[l + 1];
+      const W = new Float64Array(nIn * nOut);
+      for (let i = 0; i < W.length; i++) W[i] = xavier(nIn, nOut);
+      const b = new Float64Array(nOut);
+      this.W.push(W); this.b.push(b);
+      this.mW.push(new Float64Array(W.length)); this.vW.push(new Float64Array(W.length));
+      this.mB.push(new Float64Array(b.length)); this.vB.push(new Float64Array(b.length));
+    }
+    this.t = 0;
+  }
+  forwardFull(x){
+    // returns {acts:[x,a1,a2,...,out], zs:[z1,z2,...]}
+    const acts = [x]; const zs = [];
+    let a = x;
+    for (let l = 0; l < this.W.length; l++) {
+      const nIn = this.sizes[l], nOut = this.sizes[l + 1];
+      const W = this.W[l], b = this.b[l];
+      const z = new Float64Array(nOut);
+      for (let o = 0; o < nOut; o++) {
+        let s = b[o];
+        const base = o;
+        for (let i = 0; i < nIn; i++) s += a[i] * W[i * nOut + o];
+        z[o] = s;
+      }
+      const isLast = l === this.W.length - 1;
+      const act = new Float64Array(nOut);
+      for (let o = 0; o < nOut; o++) act[o] = isLast ? z[o] : (z[o] > 0 ? z[o] : 0);
+      zs.push(z); acts.push(act); a = act;
+    }
+    return { acts, zs };
+  }
+  forward(x){ const { acts } = this.forwardFull(x); return acts[acts.length - 1]; }
+
+  trainStep(xBatch, yBatch, lr){
+    const nLayers = this.W.length;
+    const gW = this.W.map(w => new Float64Array(w.length));
+    const gB = this.b.map(b => new Float64Array(b.length));
+    let lossSum = 0;
+    const B = xBatch.length;
+    for (let bIdx = 0; bIdx < B; bIdx++) {
+      const x = xBatch[bIdx], y = yBatch[bIdx];
+      const { acts, zs } = this.forwardFull(x);
+      const out = acts[acts.length - 1];
+      const outSize = out.length;
+      let dz = new Float64Array(outSize);
+      for (let o = 0; o < outSize; o++) {
+        const diff = out[o] - y[o];
+        lossSum += diff * diff;
+        dz[o] = (2 * diff) / outSize;
+      }
+      for (let l = nLayers - 1; l >= 0; l--) {
+        const aPrev = acts[l];
+        const nIn = this.sizes[l], nOut = this.sizes[l + 1];
+        const W = this.W[l];
+        const gWl = gW[l], gBl = gB[l];
+        for (let o = 0; o < nOut; o++) gBl[o] += dz[o];
+        for (let i = 0; i < nIn; i++) {
+          const av = aPrev[i];
+          const rowBase = i * nOut;
+          for (let o = 0; o < nOut; o++) gWl[rowBase + o] += av * dz[o];
+        }
+        if (l > 0) {
+          const dPrev = new Float64Array(nIn);
+          for (let i = 0; i < nIn; i++) {
+            let s = 0;
+            const rowBase = i * nOut;
+            for (let o = 0; o < nOut; o++) s += W[rowBase + o] * dz[o];
+            dPrev[i] = s;
+          }
+          const zPrev = zs[l - 1];
+          for (let i = 0; i < nIn; i++) dPrev[i] = zPrev[i] > 0 ? dPrev[i] : 0;
+          dz = dPrev;
+        }
+      }
+    }
+    // Adam update
+    this.t += 1;
+    const beta1 = 0.9, beta2 = 0.999, eps = 1e-8;
+    const bc1 = 1 - Math.pow(beta1, this.t), bc2 = 1 - Math.pow(beta2, this.t);
+    for (let l = 0; l < nLayers; l++) {
+      const W = this.W[l], b = this.b[l];
+      const gWl = gW[l], gBl = gB[l];
+      const mW = this.mW[l], vW = this.vW[l], mB = this.mB[l], vB = this.vB[l];
+      for (let i = 0; i < W.length; i++) {
+        const g = gWl[i] / B;
+        mW[i] = beta1 * mW[i] + (1 - beta1) * g;
+        vW[i] = beta2 * vW[i] + (1 - beta2) * g * g;
+        const mHat = mW[i] / bc1, vHat = vW[i] / bc2;
+        W[i] -= (lr * mHat) / (Math.sqrt(vHat) + eps);
+      }
+      for (let i = 0; i < b.length; i++) {
+        const g = gBl[i] / B;
+        mB[i] = beta1 * mB[i] + (1 - beta1) * g;
+        vB[i] = beta2 * vB[i] + (1 - beta2) * g * g;
+        const mHat = mB[i] / bc1, vHat = vB[i] / bc2;
+        b[i] -= (lr * mHat) / (Math.sqrt(vHat) + eps);
+      }
+    }
+    return lossSum / (B * this.sizes[this.sizes.length - 1]);
+  }
+}
+
+function stateToVec(re, im){
+  const v = new Float64Array(2 * N);
+  for (let i = 0; i < N; i++) { v[i] = re[i]; v[N + i] = im[i]; }
+  return v;
+}
+function vecToState(v){
+  const re = new Float64Array(N), im = new Float64Array(N);
+  for (let i = 0; i < N; i++) { re[i] = v[i]; im[i] = v[N + i]; }
+  return { re, im };
+}
+
+/* ======================= APP STATE ======================= */
+const state = {
+  params: { potential: 'harmonic', mass: 1, x0: -2, sigma: 0.5, k0: 2, simTime: 10 },
+  normalizeToggle: true,
+  mode: 'both',
+  ready: false,
+  playing: false,
+  frameIdx: 0,
+  dx: 0.1, x: null, V: null, dtFrame: 0.05,
+  exactFrames: null,
+  mlRawFrames: null,     // never renormalized
+  mlNormFrames: null,    // renormalized every step
+  rawNormErr: [], normNormErr: [],
+  trainLoss: null, valLoss: null,
+  lastTick: 0
+};
+
+/* ======================= DOM ======================= */
+const $ = id => document.getElementById(id);
+const potentialSel = $('potentialSel');
+const massSlider = $('massSlider'), x0Slider = $('x0Slider'), sigmaSlider = $('sigmaSlider'),
+      k0Slider = $('k0Slider'), timeSlider = $('timeSlider'), normalizeToggle = $('normalizeToggle');
+const genTrainBtn = $('genTrainBtn'), playBtn = $('playBtn'), pauseBtn = $('pauseBtn'), resetBtn = $('resetBtn');
+const timeline = $('timeline'), timeReadout = $('timeReadout');
+const statusMsg = $('statusMsg');
+const modeTabs = $('modeTabs');
+
+function setStatus(msg, kind){
+  statusMsg.textContent = msg;
+  statusMsg.className = 'status-msg show ' + (kind || 'info');
+}
+function clearStatus(){ statusMsg.className = 'status-msg'; }
+function preventFocusScroll(el){
+  el.addEventListener('mousedown', event => {
+    event.preventDefault();
+    if (typeof el.focus === 'function') el.focus({ preventScroll: true });
+  });
+}
+function clampScrollToSection(id, maxTravel = 70){
+  const target = document.getElementById(id);
+  if (!target) return;
+  const current = window.scrollY || window.pageYOffset || 0;
+  const rect = target.getBoundingClientRect();
+  const offset = Math.min(maxTravel, Math.max(12, window.innerHeight * 0.06));
+  const targetY = Math.max(0, current + rect.top - offset);
+  window.scrollTo({ top: targetY, behavior: 'auto' });
+}
+
+function applyPreset(type){
+  const p = PRESETS[type];
+  x0Slider.value = p.x0; sigmaSlider.value = p.sigma; k0Slider.value = p.k0; timeSlider.value = p.simTime;
+  $('potentialHint').textContent = p.hint;
+  readParamsFromUI();
+}
+
+function readParamsFromUI(){
+  state.params.potential = potentialSel.value;
+  state.params.mass = parseFloat(massSlider.value);
+  state.params.x0 = parseFloat(x0Slider.value);
+  state.params.sigma = parseFloat(sigmaSlider.value);
+  state.params.k0 = parseFloat(k0Slider.value);
+  state.params.simTime = parseFloat(timeSlider.value);
+  state.params.L = PRESETS[state.params.potential].L;
+  $('massVal').textContent = state.params.mass.toFixed(2);
+  $('x0Val').textContent = state.params.x0.toFixed(2);
+  $('sigmaVal').textContent = state.params.sigma.toFixed(2);
+  $('k0Val').textContent = state.params.k0.toFixed(2);
+  $('timeVal').textContent = state.params.simTime.toFixed(1);
+  const ek = (state.params.k0 * state.params.k0) / (2 * state.params.mass);
+  $('ekVal').textContent = ek.toFixed(2);
+}
+
+[potentialSel].forEach(el => el.addEventListener('change', () => { applyPreset(el.value); drawIdlePreview(); }));
+[massSlider, x0Slider, sigmaSlider, k0Slider, timeSlider].forEach(el => {
+  el.addEventListener('input', () => { readParamsFromUI(); if (!state.ready) drawIdlePreview(); });
+});
+normalizeToggle.addEventListener('change', () => { state.normalizeToggle = normalizeToggle.checked; });
+
+/* ======================= QUANTUM GREETING + MINI GAMES ======================= */
+const introOverlay = document.getElementById('quantumIntro');
+const playerNameInput = document.getElementById('playerNameInput');
+const startQuantumBtn = document.getElementById('startQuantumBtn');
+const welcomeBadge = document.getElementById('welcomeBadge');
+
+let audioCtx = null;
+function playTone(freq, duration = 0.12, type = 'sine', gainValue = 0.04){
+  try {
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtor) return;
+    if (!audioCtx) audioCtx = new AudioCtor();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gainNode.gain.value = gainValue;
+    osc.connect(gainNode).connect(audioCtx.destination);
+    osc.start();
+    const now = audioCtx.currentTime;
+    gainNode.gain.setValueAtTime(gainValue, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.stop(now + duration);
+  } catch (err) { /* no-op if browser blocks audio */ }
+}
+
+function setWelcomeName(name){
+  const safeName = (name || 'FRIEND').trim();
+  const label = 'HOLAAA, ' + safeName.toUpperCase() + '!';
+  welcomeBadge.textContent = label;
+  localStorage.setItem('quantumVisionName', safeName);
+}
+
+function startQuantumIntro(){
+  const name = (playerNameInput.value || localStorage.getItem('quantumVisionName') || 'FRIEND').trim();
+  setWelcomeName(name);
+  playTone(440, 0.18, 'triangle', 0.05);
+  playTone(660, 0.14, 'sine', 0.04);
+  introOverlay.classList.add('hidden');
+}
+
+startQuantumBtn.addEventListener('click', startQuantumIntro);
+playerNameInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') startQuantumIntro();
+});
+
+if (localStorage.getItem('quantumVisionName')) {
+  playerNameInput.value = localStorage.getItem('quantumVisionName');
+  setWelcomeName(playerNameInput.value);
+  introOverlay.classList.add('hidden');
+} else {
+  setTimeout(() => {
+    playerNameInput.focus();
+  }, 180);
+}
+
+const matchSymbols = ['|0⟩', '|1⟩', '↑', '↓', 'ψ', '⚡'];
+const matchGrid = document.getElementById('matchGrid');
+const matchScoreEl = document.getElementById('matchScore');
+let matchScore = 0;
+let matchFlipped = [];
+let matchLocked = false;
+
+function buildMatchGrid(){
+  matchGrid.innerHTML = '';
+  const deck = [...matchSymbols, ...matchSymbols].sort(() => Math.random() - 0.5);
+  deck.forEach((symbol, index) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'match-card';
+    card.textContent = '?';
+    card.dataset.symbol = symbol;
+    card.addEventListener('click', () => {
+      if (matchLocked || card.classList.contains('matched') || card.classList.contains('revealed')) return;
+      card.textContent = card.dataset.symbol;
+      card.classList.add('revealed');
+      matchFlipped.push(card);
+      if (matchFlipped.length === 2) {
+        matchLocked = true;
+        const [first, second] = matchFlipped;
+        if (first.dataset.symbol === second.dataset.symbol) {
+          matchScore += 1;
+          matchScoreEl.textContent = 'Score: ' + matchScore;
+          first.classList.add('matched');
+          second.classList.add('matched');
+          playTone(620, 0.12, 'square', 0.04);
+          playTone(860, 0.1, 'triangle', 0.03);
+          matchFlipped = [];
+          matchLocked = false;
+        } else {
+          setTimeout(() => {
+            first.textContent = '?';
+            second.textContent = '?';
+            first.classList.remove('revealed');
+            second.classList.remove('revealed');
+            matchFlipped = [];
+            matchLocked = false;
+          }, 500);
+        }
+      }
+    });
+    matchGrid.appendChild(card);
+  });
+}
+buildMatchGrid();
+
+const photonGrid = document.getElementById('photonGrid');
+const photonScoreEl = document.getElementById('photonScore');
+let photonScore = 0;
+let photonTimer = null;
+
+function spawnPhotonTarget(){
+  const buttons = [...photonGrid.querySelectorAll('.photon-btn')];
+  buttons.forEach(btn => btn.classList.remove('active'));
+  const randomBtn = buttons[Math.floor(Math.random() * buttons.length)];
+  randomBtn.classList.add('active');
+  clearTimeout(photonTimer);
+  photonTimer = setTimeout(() => {
+    randomBtn.classList.remove('active');
+    spawnPhotonTarget();
+  }, 900);
+}
+
+function buildPhotonGrid(){
+  photonGrid.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'photon-btn';
+    btn.textContent = '✦';
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('active')) {
+        photonScore += 1;
+        photonScoreEl.textContent = 'Score: ' + photonScore;
+        btn.classList.remove('active');
+        playTone(780, 0.08, 'triangle', 0.05);
+        playTone(980, 0.08, 'sine', 0.04);
+        spawnPhotonTarget();
+      }
+    });
+    photonGrid.appendChild(btn);
+  }
+  spawnPhotonTarget();
+}
+buildPhotonGrid();
+
+const waveSlider = document.getElementById('waveSlider');
+const waveBar = document.getElementById('waveBar');
+const waveSubmit = document.getElementById('waveSubmit');
+const waveScoreEl = document.getElementById('waveScore');
+let waveStreak = 0;
+let targetWave = 52;
+
+function updateWaveBar(){
+  const value = Number(waveSlider.value);
+  const percent = value / 100;
+  waveBar.style.transform = 'scaleX(' + (0.25 + percent * 0.75) + ')';
+  waveBar.style.filter = 'drop-shadow(0 0 12px rgba(95,216,202,0.5))';
+  waveBar.style.opacity = '0.9';
+}
+
+function randomizeWaveTarget(){
+  targetWave = 20 + Math.floor(Math.random() * 61);
+  waveBar.style.setProperty('--target', targetWave);
+  waveBar.style.filter = 'drop-shadow(0 0 0 rgba(0,0,0,0))';
+}
+waveSlider.addEventListener('input', updateWaveBar);
+waveSubmit.addEventListener('click', () => {
+  const value = Number(waveSlider.value);
+  if (Math.abs(value - targetWave) <= 8) {
+    waveStreak += 1;
+    waveScoreEl.textContent = 'Streak: ' + waveStreak;
+    playTone(520, 0.12, 'sine', 0.05);
+    playTone(760, 0.1, 'triangle', 0.04);
+    randomizeWaveTarget();
+  } else {
+    waveStreak = 0;
+    waveScoreEl.textContent = 'Streak: 0';
+    playTone(200, 0.12, 'sawtooth', 0.03);
+  }
+});
+randomizeWaveTarget();
+updateWaveBar();
+
+/* ======================= TRAINING PIPELINE ======================= */
+async function generateAndTrain(){
+  try{
+    stopPlayback();
+    genTrainBtn.disabled = true;
+    readParamsFromUI();
+    if (state.params.sigma <= 0 || state.params.simTime <= 0 || state.params.mass <= 0) {
+      throw new Error('Parameters must be positive: mass, σ, and simulation time.');
+    }
+    setStatus('Running Schrödinger solver (split-step Fourier)…', 'busy');
+    await nextPaint();
+
+    const traj = generateExactTrajectory(state.params);
+    state.exactFrames = traj.frames;
+    state.V = traj.V; state.x = traj.x; state.dx = traj.dx; state.dtFrame = traj.dtFrame;
+
+    // Build training pairs from consecutive exact frames
+    const X = [], Y = [];
+    for (let f = 0; f < traj.frames.length - 1; f++) {
+      X.push(stateToVec(traj.frames[f].re, traj.frames[f].im));
+      Y.push(stateToVec(traj.frames[f + 1].re, traj.frames[f + 1].im));
+    }
+    // scale for stable training
+    let maxAbs = 1e-9;
+    for (const v of X) for (let i = 0; i < v.length; i++) maxAbs = Math.max(maxAbs, Math.abs(v[i]));
+    for (const v of Y) for (let i = 0; i < v.length; i++) maxAbs = Math.max(maxAbs, Math.abs(v[i]));
+    const scale = maxAbs;
+    const Xs = X.map(v => v.map(a => a / scale));
+    const Ys = Y.map(v => v.map(a => a / scale));
+
+    // shuffle + split 80/20
+    const idxArr = [...Array(Xs.length).keys()];
+    for (let i = idxArr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [idxArr[i], idxArr[j]] = [idxArr[j], idxArr[i]]; }
+    const nVal = Math.max(1, Math.floor(idxArr.length * 0.2));
+    const valIdx = idxArr.slice(0, nVal), trainIdx = idxArr.slice(nVal);
+
+    setStatus('Training lightweight MLP on ' + trainIdx.length + ' state-transition pairs…', 'busy');
+    await nextPaint();
+
+    const mlp = new MLP([2 * N, 64, 64, 2 * N]);
+    const epochs = 25, batchSize = 16, lr = 0.01;
+    let lastTrainLoss = 0;
+    for (let e = 0; e < epochs; e++) {
+      for (let i = trainIdx.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [trainIdx[i], trainIdx[j]] = [trainIdx[j], trainIdx[i]]; }
+      let epochLoss = 0, nBatches = 0;
+      for (let b = 0; b < trainIdx.length; b += batchSize) {
+        const batchIdx = trainIdx.slice(b, b + batchSize);
+        const xb = batchIdx.map(ix => Xs[ix]);
+        const yb = batchIdx.map(ix => Ys[ix]);
+        epochLoss += mlp.trainStep(xb, yb, lr);
+        nBatches++;
+      }
+      lastTrainLoss = epochLoss / nBatches;
+      if (e % 4 === 0) { setStatus('Training… epoch ' + (e + 1) + '/' + epochs + ' — loss ' + lastTrainLoss.toExponential(3), 'busy'); await nextPaint(); }
+    }
+    // validation loss
+    let valLoss = 0;
+    for (const ix of valIdx) {
+      const out = mlp.forward(Xs[ix]);
+      let s = 0; for (let i = 0; i < out.length; i++) { const d = out[i] - Ys[ix][i]; s += d * d; }
+      valLoss += s / out.length;
+    }
+    valLoss /= valIdx.length;
+    state.trainLoss = lastTrainLoss; state.valLoss = valLoss;
+
+    setStatus('Running autoregressive ML rollout…', 'busy');
+    await nextPaint();
+
+    // Autoregressive rollout: two parallel chains (raw / renormalized)
+    const mlRaw = [{ re: traj.frames[0].re.slice(), im: traj.frames[0].im.slice() }];
+    const mlNorm = [{ re: traj.frames[0].re.slice(), im: traj.frames[0].im.slice() }];
+    const rawErr = [Math.abs(normOf(mlRaw[0].re, mlRaw[0].im, traj.dx) - 1)];
+    const normErr = [Math.abs(normOf(mlNorm[0].re, mlNorm[0].im, traj.dx) - 1)];
+
+    let curRaw = mlRaw[0], curNorm = mlNorm[0];
+    for (let f = 1; f < N_FRAMES; f++) {
+      // raw chain
+      const inRaw = stateToVec(curRaw.re, curRaw.im).map(a => a / scale);
+      const outRaw = mlp.forward(inRaw).map(a => a * scale);
+      const nextRaw = vecToState(outRaw);
+      mlRaw.push(nextRaw); curRaw = nextRaw;
+      rawErr.push(Math.abs(normOf(nextRaw.re, nextRaw.im, traj.dx) - 1));
+
+      // normalized chain
+      const inNorm = stateToVec(curNorm.re, curNorm.im).map(a => a / scale);
+      const outNorm = mlp.forward(inNorm).map(a => a * scale);
+      const nextNorm = vecToState(outNorm);
+      normalizeArr(nextNorm.re, nextNorm.im, traj.dx);
+      mlNorm.push(nextNorm); curNorm = nextNorm;
+      normErr.push(Math.abs(normOf(nextNorm.re, nextNorm.im, traj.dx) - 1));
+
+      if (hasNaN(nextRaw.re) || hasNaN(nextNorm.re)) break;
+    }
+    state.mlRawFrames = mlRaw; state.mlNormFrames = mlNorm;
+    state.rawNormErr = rawErr; state.normNormErr = normErr;
+
+    state.ready = true;
+    state.frameIdx = 0;
+    timeline.max = N_FRAMES - 1; timeline.disabled = false; timeline.value = 0;
+    playBtn.disabled = false; pauseBtn.disabled = true; resetBtn.disabled = false;
+
+    setStatus('Done — ' + N_FRAMES + ' frames simulated, MLP trained (val loss ' + valLoss.toExponential(3) + '). Press ▶ to play.', 'info');
+    setTimeout(() => { if (statusMsg.textContent.startsWith('Done')) clearStatus(); }, 6000);
+
+    renderStabilityPlot();
+    renderFrame(0);
+    updateResearchPanel();
+
+  } catch(err){
+    console.error(err);
+    setStatus(err.message || 'Something went wrong while running the simulation.', 'error');
+  } finally {
+    genTrainBtn.disabled = false;
+  }
+}
+function nextPaint(){ return new Promise(r => requestAnimationFrame(() => setTimeout(r, 0))); }
+
+/* ======================= PLAYBACK ======================= */
+function stopPlayback(){ state.playing = false; playBtn.disabled = !state.ready; pauseBtn.disabled = true; }
+playBtn.addEventListener('click', () => {
+  if (!state.ready) return;
+  if (state.frameIdx >= N_FRAMES - 1) state.frameIdx = 0;
+  state.playing = true; playBtn.disabled = true; pauseBtn.disabled = false;
+  state.lastTick = performance.now();
+  requestAnimationFrame(tick);
+});
+pauseBtn.addEventListener('click', stopPlayback);
+resetBtn.addEventListener('click', () => { stopPlayback(); state.frameIdx = 0; timeline.value = 0; renderFrame(0); });
+timeline.addEventListener('input', () => { stopPlayback(); state.frameIdx = parseInt(timeline.value, 10); renderFrame(state.frameIdx); });
+
+function tick(now){
+  if (!state.playing) return;
+  const dtMs = now - state.lastTick;
+  const framesPerSec = 24;
+  if (dtMs > 1000 / framesPerSec) {
+    state.lastTick = now;
+    state.frameIdx += 1;
+    if (state.frameIdx >= N_FRAMES) { state.frameIdx = N_FRAMES - 1; stopPlayback(); }
+    timeline.value = state.frameIdx;
+    renderFrame(state.frameIdx);
+  }
+  if (state.playing) requestAnimationFrame(tick);
+}
+
+modeTabs.addEventListener('click', e => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  [...modeTabs.children].forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.mode = btn.dataset.mode;
+  renderFrame(state.frameIdx);
+});
+preventFocusScroll(genTrainBtn);
+preventFocusScroll(playBtn);
+preventFocusScroll(pauseBtn);
+preventFocusScroll(resetBtn);
+[...modeTabs.children].forEach(btn => preventFocusScroll(btn));
+$('genTrainBtn').addEventListener('click', generateAndTrain);
+$('ctaLaunch').addEventListener('click', () => clampScrollToSection('app', 50));
+$('ctaExplore').addEventListener('click', () => clampScrollToSection('edu', 50));
+
+/* ======================= RENDERING ======================= */
+function setupCanvas(canvas){
+  const rect = canvas.getBoundingClientRect();
+  const cssH = parseInt(canvas.getAttribute('height'), 10) || rect.height || 160;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.height = cssH + 'px';
+  canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+  canvas.height = Math.max(1, Math.floor(cssH * dpr));
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w: rect.width, h: cssH };
+}
+
+function drawAxesAndGrid(ctx, w, h, pad, yMin, yMax){
+  ctx.clearRect(0, 0, w, h);
+  ctx.strokeStyle = getCSS('--grid'); ctx.lineWidth = 1;
+  const rows = 4;
+  for (let i = 0; i <= rows; i++) {
+    const y = pad.t + (i / rows) * (h - pad.t - pad.b);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+  }
+  // zero line for y=0 if within range
+  if (yMin < 0 && yMax > 0) {
+    const yZero = pad.t + (1 - (0 - yMin) / (yMax - yMin)) * (h - pad.t - pad.b);
+    ctx.strokeStyle = 'rgba(148,168,207,0.22)';
+    ctx.beginPath(); ctx.moveTo(pad.l, yZero); ctx.lineTo(w - pad.r, yZero); ctx.stroke();
+  }
+}
+function getCSS(varName){ return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+
+function plotSeries(ctx, w, h, pad, xArr, yArr, xMin, xMax, yMin, yMax, color, dashed){
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = 1.8;
+  if (dashed) ctx.setLineDash([5, 4]); else ctx.setLineDash([]);
+  ctx.beginPath();
+  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  for (let i = 0; i < xArr.length; i++) {
+    const px = pad.l + ((xArr[i] - xMin) / (xMax - xMin)) * iw;
+    const py = pad.t + (1 - (yArr[i] - yMin) / (yMax - yMin)) * ih;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+function fillArea(ctx, w, h, pad, xArr, yArr, xMin, xMax, yMin, yMax, color){
+  ctx.save();
+  const iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  ctx.beginPath();
+  for (let i = 0; i < xArr.length; i++) {
+    const px = pad.l + ((xArr[i] - xMin) / (xMax - xMin)) * iw;
+    const py = pad.t + (1 - (yArr[i] - yMin) / (yMax - yMin)) * ih;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.lineTo(pad.l + iw, pad.t + ih); ctx.lineTo(pad.l, pad.t + ih); ctx.closePath();
+  ctx.fillStyle = color; ctx.fill();
+  ctx.restore();
+}
+
+const potCanvas = $('potCanvas'), psiCanvas = $('psiCanvas'), probCanvas = $('probCanvas'), stabCanvas = $('stabCanvas');
+
+function drawIdlePreview(){
+  // Show V(x) and initial wave packet before training, per spec section 5.
+  readParamsFromUI();
+  const { dx, x, k } = buildGrid(state.params.L);
+  const V = potentialAt(state.params.potential, x);
+  const { re, im } = gaussianPacket(x, state.params.x0, state.params.sigma, state.params.k0, dx);
+  state.x = x; state.V = V; state.dx = dx;
+  drawPotential(x, V);
+  drawPsi(x, re, im, null, null);
+  drawProb(x, re, im, null, null);
+  $('metricT').textContent = 't = 0.00';
+  $('metricNExact').textContent = 'N = ' + normOf(re, im, dx).toFixed(4);
+  $('metricNMl').textContent = 'N = —';
+  $('metricErrExact').textContent = Math.abs(normOf(re, im, dx) - 1).toExponential(2);
+}
+
+function drawPotential(x, V){
+  const { ctx, w, h } = setupCanvas(potCanvas);
+  const pad = { l: 42, r: 14, t: 10, b: 22 };
+  let vMin = Math.min(...V), vMax = Math.max(...V);
+  if (vMax - vMin < 1e-6) { vMin -= 1; vMax += 1; }
+  const margin = (vMax - vMin) * 0.15;
+  vMin -= margin; vMax += margin;
+  drawAxesAndGrid(ctx, w, h, pad, vMin, vMax);
+  plotSeries(ctx, w, h, pad, x, V, x[0], x[x.length - 1], vMin, vMax, getCSS('--text-muted'), false);
+  drawYLabels(ctx, pad, h, vMin, vMax);
+}
+function drawYLabels(ctx, pad, h, yMin, yMax){
+  ctx.fillStyle = getCSS('--text-dim'); ctx.font = '10px IBM Plex Mono, monospace'; ctx.textAlign = 'right';
+  const rows = 4;
+  for (let i = 0; i <= rows; i++) {
+    const val = yMax - (i / rows) * (yMax - yMin);
+    const y = pad.t + (i / rows) * (h - pad.t - pad.b);
+    ctx.fillText(val.toFixed(1), pad.l - 6, y + 3);
+  }
+}
+
+function drawPsi(x, reE, imE, reM, imM){
+  const { ctx, w, h } = setupCanvas(psiCanvas);
+  const pad = { l: 42, r: 14, t: 10, b: 22 };
+  let yMin = -0.1, yMax = 0.1;
+  const all = [reE, imE, reM, imM].filter(Boolean);
+  for (const arr of all) for (const v of arr) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+  const margin = (yMax - yMin) * 0.15; yMin -= margin; yMax += margin;
+  drawAxesAndGrid(ctx, w, h, pad, yMin, yMax);
+  const showExact = state.mode !== 'ml', showMl = state.mode !== 'exact';
+  if (showExact) {
+    plotSeries(ctx, w, h, pad, x, reE, x[0], x[x.length - 1], yMin, yMax, getCSS('--exact'), false);
+    plotSeries(ctx, w, h, pad, x, imE, x[0], x[x.length - 1], yMin, yMax, getCSS('--exact'), true);
+  }
+  if (showMl && reM) {
+    plotSeries(ctx, w, h, pad, x, reM, x[0], x[x.length - 1], yMin, yMax, getCSS('--ml'), false);
+    plotSeries(ctx, w, h, pad, x, imM, x[0], x[x.length - 1], yMin, yMax, getCSS('--ml'), true);
+  }
+  drawYLabels(ctx, pad, h, yMin, yMax);
+}
+
+function drawProb(x, reE, imE, reM, imM){
+  const { ctx, w, h } = setupCanvas(probCanvas);
+  const pad = { l: 42, r: 14, t: 10, b: 22 };
+  const probE = new Float64Array(N); for (let i = 0; i < N; i++) probE[i] = reE[i] * reE[i] + imE[i] * imE[i];
+  let probM = null;
+  if (reM) { probM = new Float64Array(N); for (let i = 0; i < N; i++) probM[i] = reM[i] * reM[i] + imM[i] * imM[i]; }
+  let yMax = Math.max(...probE) * 1.2 || 0.1;
+  if (probM) yMax = Math.max(yMax, Math.max(...probM) * 1.2);
+  const yMin = 0;
+  drawAxesAndGrid(ctx, w, h, pad, yMin, yMax);
+  const showExact = state.mode !== 'ml', showMl = state.mode !== 'exact';
+  if (showExact) {
+    fillArea(ctx, w, h, pad, x, probE, x[0], x[x.length - 1], yMin, yMax, 'rgba(95,216,202,0.16)');
+    plotSeries(ctx, w, h, pad, x, probE, x[0], x[x.length - 1], yMin, yMax, getCSS('--exact'), false);
+  }
+  if (showMl && probM) {
+    plotSeries(ctx, w, h, pad, x, probM, x[0], x[x.length - 1], yMin, yMax, getCSS('--ml'), true);
+  }
+  drawYLabels(ctx, pad, h, yMin, yMax);
+}
+
+function renderStabilityPlot(){
+  const { ctx, w, h } = setupCanvas(stabCanvas);
+  const pad = { l: 46, r: 14, t: 10, b: 22 };
+  const exactErr = state.exactFrames.map(fr => Math.abs(normOf(fr.re, fr.im, state.dx) - 1));
+  const tArr = exactErr.map((_, i) => i * state.dtFrame);
+  const mlErr = state.rawNormErr;
+  let yMax = Math.max(1e-6, Math.max(...exactErr), Math.max(...mlErr)) * 1.3;
+  drawAxesAndGrid(ctx, w, h, pad, 0, yMax);
+  plotSeries(ctx, w, h, pad, tArr, exactErr, tArr[0], tArr[tArr.length - 1], 0, yMax, getCSS('--exact'), false);
+  plotSeries(ctx, w, h, pad, tArr.slice(0, mlErr.length), mlErr, tArr[0], tArr[tArr.length - 1], 0, yMax, getCSS('--ml'), false);
+  drawYLabels(ctx, pad, h, 0, yMax);
+}
+
+function rmse(a, b){
+  let s = 0; for (let i = 0; i < a.length; i++) { const d = a[i] - b[i]; s += d * d; }
+  return Math.sqrt(s / a.length);
+}
+
+function renderFrame(idx){
+  if (!state.ready) return;
+  const ef = state.exactFrames[idx];
+  const useNorm = state.normalizeToggle;
+  const mlChain = useNorm ? state.mlNormFrames : state.mlRawFrames;
+  const mf = mlChain[Math.min(idx, mlChain.length - 1)];
+
+  drawPotential(state.x, state.V);
+  drawPsi(state.x, ef.re, ef.im, mf.re, mf.im);
+  drawProb(state.x, ef.re, ef.im, mf.re, mf.im);
+
+  const t = idx * state.dtFrame;
+  const nExact = normOf(ef.re, ef.im, state.dx);
+  const nMlUsed = normOf(mf.re, mf.im, state.dx);
+  const combined = new Float64Array(2 * N), combinedM = new Float64Array(2 * N);
+  for (let i = 0; i < N; i++) { combined[i] = ef.re[i]; combined[N + i] = ef.im[i]; combinedM[i] = mf.re[i]; combinedM[N + i] = mf.im[i]; }
+  const wfRmse = rmse(combined, combinedM);
+
+  const rawErrAtIdx = state.rawNormErr[Math.min(idx, state.rawNormErr.length - 1)];
+  const normErrAtIdx = state.normNormErr[Math.min(idx, state.normNormErr.length - 1)];
+
+  $('metricT').textContent = 't = ' + t.toFixed(2);
+  $('metricNExact').textContent = 'N = ' + nExact.toFixed(4);
+  $('metricNMl').textContent = 'N = ' + nMlUsed.toFixed(4);
+  $('metricErrExact').textContent = Math.abs(nExact - 1).toExponential(2);
+  $('metricErrMl').textContent = Math.abs(nMlUsed - 1).toExponential(2);
+  $('metricRmse').textContent = wfRmse.toExponential(3);
+  $('metricLoss').textContent = state.trainLoss != null ? state.trainLoss.toExponential(3) : '—';
+  $('metricLossSub').textContent = state.valLoss != null ? ('val loss ' + state.valLoss.toExponential(3)) : 'not trained yet';
+  $('metricRawNorm').textContent = rawErrAtIdx.toExponential(2) + ' / ' + normErrAtIdx.toExponential(2);
+  timeReadout.textContent = 't = ' + t.toFixed(2) + ' / ' + state.params.simTime.toFixed(2);
+
+  updateResearchPanel(wfRmse);
+}
+
+function updateResearchPanel(currentRmse){
+  if (!state.ready) return;
+  const exactErrArr = state.exactFrames.map(fr => Math.abs(normOf(fr.re, fr.im, state.dx) - 1));
+  const meanExactErr = exactErrArr.reduce((a, b) => a + b, 0) / exactErrArr.length;
+  const meanMlErr = state.rawNormErr.reduce((a, b) => a + b, 0) / state.rawNormErr.length;
+  $('rvConservation').textContent = 'mean|N−1| = ' + meanExactErr.toExponential(2);
+  $('rvRmse').textContent = (currentRmse != null ? currentRmse : 0).toExponential(3);
+  $('rvStability').textContent = 'exact ' + meanExactErr.toExponential(2) + ' · ML ' + meanMlErr.toExponential(2);
+  $('rvValLoss').textContent = state.valLoss != null ? state.valLoss.toExponential(3) : '—';
+}
+
+/* ======================= HERO CANVAS (ambient wave animation) ======================= */
+(function heroAnim(){
+  const canvas = $('heroCanvas');
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+    canvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize(); window.addEventListener('resize', resize);
+  const ctx = canvas.getContext('2d');
+  let tAcc = 0, last = performance.now();
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function frame(now){
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (!reduced) tAcc += dt;
+    const rect = canvas.getBoundingClientRect();
+    const w = rect.width, h = rect.height;
+    ctx.clearRect(0, 0, w, h);
+    const midY = h * 0.55;
+    // envelope-modulated wave packet drifting across the panel
+    const packetX = ((tAcc * 40) % (w + 200)) - 100;
+    for (const [color, phaseOff, ampScale] of [[getCSS('--exact'), 0, 1], [getCSS('--ml'), Math.PI / 2, 0.85]]) {
+      ctx.beginPath();
+      for (let px = 0; px <= w; px += 3) {
+        const env = Math.exp(-((px - packetX) ** 2) / (2 * 70 * 70));
+        const y = midY + Math.sin(px * 0.09 + tAcc * 3 + phaseOff) * env * 46 * ampScale;
+        if (px === 0) ctx.moveTo(px, y); else ctx.lineTo(px, y);
+      }
+      ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.globalAlpha = 0.85; ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ======================= INIT ======================= */
+window.addEventListener('resize', () => { if (state.ready) renderFrame(state.frameIdx); else drawIdlePreview(); if(state.ready) renderStabilityPlot(); });
+
+applyPreset('harmonic');
+readParamsFromUI();
+drawIdlePreview();
+
+})();
+</script>
+</body>
+</html>
