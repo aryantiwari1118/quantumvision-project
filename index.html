@@ -179,6 +179,8 @@
 
   .btn-row{display:flex; gap:10px; margin-top:6px;}
   .btn-row .btn{flex:1;}
+  .btn-reset{background:transparent; border:1px solid rgba(95,216,202,0.46); color:var(--exact);}
+  .btn-reset:hover{background:rgba(95,216,202,0.08);}
   .transport{display:flex; gap:8px; margin-top:14px;}
   .transport button{
     flex:1; background:var(--bg-2); border:1px solid var(--panel-border); color:var(--text);
@@ -236,6 +238,32 @@
   .flow span{background:var(--bg-2); border:1px solid var(--panel-border); padding:6px 11px; border-radius:99px;}
   .flow i{color:var(--text-dim);}
 
+  .quantum-3d-stage{
+    position:relative; height:220px; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at center, rgba(95,216,202,0.12), rgba(255,255,255,0.02) 40%, rgba(8,11,19,0.18) 100%);
+    border-radius:14px; border:1px solid var(--panel-border); overflow:hidden; perspective:1200px;
+  }
+  .quantum-3d-object{
+    position:relative; width:170px; height:170px; transform-style:preserve-3d; animation:orbitalSpin 12s linear infinite;
+  }
+  .quantum-ring{
+    position:absolute; inset:0; border:1px solid rgba(95,216,202,0.55); border-radius:50%;
+    box-shadow:0 0 22px rgba(95,216,202,0.12);
+  }
+  .quantum-ring.r1{transform:rotateX(75deg) rotateY(25deg);}
+  .quantum-ring.r2{transform:rotateY(75deg) rotateZ(35deg); border-color:rgba(242,166,90,0.55);}
+  .quantum-ring.r3{transform:rotateX(35deg) rotateZ(55deg); border-color:rgba(148,168,207,0.52);}
+  .quantum-orbit{
+    position:absolute; width:12px; height:12px; border-radius:50%;
+    background:radial-gradient(circle, #ffffff 0%, var(--exact) 25%, rgba(95,216,202,0.2) 100%);
+    top:50%; left:50%; margin:-6px 0 0 -6px; box-shadow:0 0 18px rgba(95,216,202,0.65);
+  }
+  .quantum-orbit:nth-child(1){transform:translate3d(60px, -44px, 24px);}
+  .quantum-orbit:nth-child(2){transform:translate3d(-62px, 38px, 18px);}
+  .quantum-orbit:nth-child(3){transform:translate3d(0px, 70px, -24px); background:radial-gradient(circle, #ffffff 0%, var(--ml) 20%, rgba(242,166,90,0.25) 100%);}
+  .quantum-orbit:nth-child(4){transform:translate3d(28px, -78px, -26px); background:radial-gradient(circle, #ffffff 0%, #8bc8ff 20%, rgba(148,168,207,0.3) 100%);}
+  .quantum-core{position:absolute; inset:42px; border-radius:50%; background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(95,216,202,0.42) 30%, rgba(8,11,19,0.8) 70%); border:1px solid rgba(95,216,202,0.65); box-shadow:0 0 36px rgba(95,216,202,0.24); transform:translateZ(32px);}
+
   .research-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:18px;}
   @media (max-width:820px){ .research-grid{grid-template-columns:1fr;} }
   .valid-row{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--panel-border);}
@@ -246,6 +274,7 @@
 
   footer{padding:30px 0 50px; text-align:center; color:var(--text-dim); font-size:0.8rem;}
 
+  @keyframes orbitalSpin { from { transform: rotateX(64deg) rotateY(20deg) rotateZ(0deg);} to { transform: rotateX(64deg) rotateY(20deg) rotateZ(360deg);} }
   @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
 </style>
 </head>
@@ -373,6 +402,7 @@
           </div>
 
           <button class="btn btn-primary" id="genTrainBtn" style="width:100%; margin-top:8px;">Generate &amp; Train</button>
+          <button class="btn btn-reset" id="resetGraphBtn" style="width:100%; margin-top:10px;">Reset Graph</button>
 
           <div class="transport">
             <button id="playBtn" disabled title="Play">▶</button>
@@ -446,6 +476,44 @@
 
     <div class="flow">
       <span>USER PARAMETERS</span><i>→</i><span>QUANTUM SYSTEM</span><i>→</i><span>SCHRÖDINGER SOLVER</span><i>→</i><span>PHYSICS TRAJECTORY</span><i>→</i><span>ML TRAINING</span><i>→</i><span>AUTOREGRESSIVE ML PREDICTION</span><i>→</i><span>EXACT vs ML</span><i>→</i><span>PHYSICS VALIDATION</span>
+    </div>
+  </section>
+
+  <!-- 3D QUANTUM PROJECT -->
+  <section class="section" id="quantum3d">
+    <div class="section-head">
+      <h2>3D Quantum Project</h2>
+      <p>Emerging visual research prototype exploring quantum state evolution in a 3D field space.</p>
+    </div>
+
+    <div class="research-grid">
+      <div class="panel">
+        <div class="panel-title"><span class="dot"></span>Project Vision</div>
+        <p style="margin:0 0 12px; color:var(--text-muted);">This 3D quantum module translates the wave-function behavior into a spatial orbital view, helping researchers explore amplitude, interference, and phase in a more immersive way.</p>
+        <div class="flow" style="margin-top:0;">
+          <span>3D FIELD</span><i>→</i><span>ORBITAL MAP</span><i>→</i><span>PHASE SHIFT</span><i>→</i><span>INTERFERENCE</span>
+        </div>
+        <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-primary" type="button">Open 3D View</button>
+          <button class="btn btn-ghost" type="button">Research Notes</button>
+        </div>
+      </div>
+
+      <div class="plot-card" style="margin-bottom:0; overflow:hidden;">
+        <div class="plot-head"><h3>Quantum Orbital Sandbox</h3></div>
+        <div class="quantum-3d-stage">
+          <div class="quantum-3d-object">
+            <div class="quantum-ring r1"></div>
+            <div class="quantum-ring r2"></div>
+            <div class="quantum-ring r3"></div>
+            <div class="quantum-core"></div>
+            <span class="quantum-orbit"></span>
+            <span class="quantum-orbit"></span>
+            <span class="quantum-orbit"></span>
+            <span class="quantum-orbit"></span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -808,7 +876,7 @@ const $ = id => document.getElementById(id);
 const potentialSel = $('potentialSel');
 const massSlider = $('massSlider'), x0Slider = $('x0Slider'), sigmaSlider = $('sigmaSlider'),
       k0Slider = $('k0Slider'), timeSlider = $('timeSlider'), normalizeToggle = $('normalizeToggle');
-const genTrainBtn = $('genTrainBtn'), playBtn = $('playBtn'), pauseBtn = $('pauseBtn'), resetBtn = $('resetBtn');
+const genTrainBtn = $('genTrainBtn'), resetGraphBtn = $('resetGraphBtn'), playBtn = $('playBtn'), pauseBtn = $('pauseBtn'), resetBtn = $('resetBtn');
 const timeline = $('timeline'), timeReadout = $('timeReadout');
 const statusMsg = $('statusMsg');
 const modeTabs = $('modeTabs');
@@ -1199,7 +1267,26 @@ modeTabs.addEventListener('click', e => {
   state.mode = btn.dataset.mode;
   renderFrame(state.frameIdx);
 });
+
+function resetGraphState(){
+  stopPlayback();
+  state.ready = false;
+  state.mode = 'both';
+  [...modeTabs.children].forEach(btn => btn.classList.toggle('active', btn.dataset.mode === 'both'));
+  potentialSel.value = 'harmonic';
+  applyPreset('harmonic');
+  readParamsFromUI();
+  state.frameIdx = 0;
+  timeline.value = 0;
+  timeline.disabled = true;
+  timeReadout.textContent = 't = 0.00 / 0.00';
+  clearStatus();
+  drawIdlePreview();
+}
+
+resetGraphBtn.addEventListener('click', resetGraphState);
 preventFocusScroll(genTrainBtn);
+preventFocusScroll(resetGraphBtn);
 preventFocusScroll(playBtn);
 preventFocusScroll(pauseBtn);
 preventFocusScroll(resetBtn);
